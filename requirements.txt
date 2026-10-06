@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+
+transformers>=5,<6
+accelerate
+sentencepiece
+safetensors
+
+pydantic>=2
+pydantic-settings
