@@ -125,6 +125,12 @@ async def translate_batch(
             detail=str(exc),
         ) from exc
 
+    except TranslationBackendError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=str(exc),
+        ) from exc
+
     except ValueError as exc:
         raise HTTPException(
             status_code=400,

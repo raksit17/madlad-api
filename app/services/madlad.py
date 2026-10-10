@@ -65,16 +65,10 @@ class MadladTranslator:
             print("Using CPU")
 
             self.model = AutoModelForSeq2SeqLM.from_pretrained(
-                    self.settings.model_name,
-                    dtype=dtype,
-                    device_map="auto",
-                    max_memory={
-                        0: "7GiB",
-                        "cpu": "40GiB",
-                    },
-                    low_cpu_mem_usage=True,
-                )
-
+                self.settings.model_name,
+                dtype=torch.float32,
+                low_cpu_mem_usage=True,
+            )
             self.model.to("cpu")
 
         self.model.eval()
