@@ -122,3 +122,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Generated results from local model comparisons
+experiments/translation_comparison/results/

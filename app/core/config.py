@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -8,6 +9,17 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
 
     model_name: str = "google/madlad400-3b-mt"
+
+    # Keep MADLAD as the default so existing installations do not change.
+    translation_provider: Literal["madlad", "qwen"] = "madlad"
+
+    # Experimental Qwen mode uses an independently running Ollama server.
+    qwen_base_url: str = "http://host.docker.internal:11434"
+    qwen_model: str = "qwen3.5:4b"
+    qwen_timeout_seconds: float = 180.0
+    qwen_temperature: float = 0.1
+    qwen_context_tokens: int = 4096
+    qwen_max_input_chars: int = 8000
 
     target_language: str = "th"
 

@@ -13,9 +13,10 @@ from app.schemas.translation import (
     TranslateResponse,
 )
 
-from app.services.madlad import (
+from app.services.errors import (
     BatchTooLargeError,
     InputTooLongError,
+    TranslationBackendError,
 )
 
 
@@ -35,7 +36,12 @@ async def ready(request: Request):
 
     return {
         "ready": translator.is_ready(),
-        "model": translator.settings.model_name,
+        "provider": translator.settings.translation_provider,
+        "model": (
+            translator.settings.qwen_model
+            if translator.settings.translation_provider == "qwen"
+            else translator.settings.model_name
+        ),
         "device": (
             str(translator.input_device)
             if translator.input_device
@@ -67,6 +73,12 @@ async def translate(
     except InputTooLongError as exc:
         raise HTTPException(
             status_code=413,
+            detail=str(exc),
+        ) from exc
+
+    except TranslationBackendError as exc:
+        raise HTTPException(
+            status_code=502,
             detail=str(exc),
         ) from exc
 
@@ -110,6 +122,12 @@ async def translate_batch(
     except BatchTooLargeError as exc:
         raise HTTPException(
             status_code=400,
+            detail=str(exc),
+        ) from exc
+
+    except TranslationBackendError as exc:
+        raise HTTPException(
+            status_code=502,
             detail=str(exc),
         ) from exc
 

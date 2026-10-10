@@ -4,25 +4,33 @@ from fastapi import FastAPI
 
 from app.api.routes import router
 from app.core.config import get_settings
-from app.services.madlad import MadladTranslator
 
 
 settings = get_settings()
 
 
+def create_translator():
+    # Import only the selected provider; Qwen mode never loads MADLAD weights.
+    if settings.translation_provider == "qwen":
+        from app.experimental.qwen.translator import QwenTranslator
+
+        return QwenTranslator(settings=settings)
+
+    from app.services.madlad import MadladTranslator
+
+    return MadladTranslator(settings=settings)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    translator = MadladTranslator(
-        settings=settings,
-    )
-
+    translator = create_translator()
     translator.load()
-
     app.state.translator = translator
 
-    yield
-
-    translator.unload()
+    try:
+        yield
+    finally:
+        translator.unload()
 
 
 app = FastAPI(
@@ -30,7 +38,6 @@ app = FastAPI(
     version=settings.app_version,
     lifespan=lifespan,
 )
-
 
 app.include_router(router)
 
@@ -40,7 +47,12 @@ async def root():
     return {
         "name": settings.app_name,
         "version": settings.app_version,
-        "model": settings.model_name,
+        "provider": settings.translation_provider,
+        "model": (
+            settings.qwen_model
+            if settings.translation_provider == "qwen"
+            else settings.model_name
+        ),
         "docs": "/docs",
         "translate": "/v1/translate",
         "batch": "/v1/translate/batch",
