@@ -9,14 +9,7 @@ from transformers import (
 )
 
 from app.core.config import Settings
-
-
-class InputTooLongError(Exception):
-    pass
-
-
-class BatchTooLargeError(Exception):
-    pass
+from app.services.errors import InputTooLongError, BatchTooLargeError
 
 
 class MadladTranslator:
