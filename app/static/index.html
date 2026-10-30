@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MADLAD • แปลเกมสด</title>
+  <link rel="stylesheet" href="/stream-assets/style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+  <script type="module" src="/stream-assets/stream.mjs"></script>
+</head>
+<body>
+<main>
+  <header><span class="tag">MADLAD / LIVE TRANSLATION</span><h1>เล่นเกม เข้าใจทุกบทสนทนา</h1><p>แปลข้อความจากภาพเกมหรือสตรีม พร้อมฝึกภาษาอังกฤษไปด้วย</p></header>
+  <section class="controls" aria-label="ตั้งค่าการแปล">
+    <label>ภาษาต้นฉบับ<select id="source"><option value="en">English → ไทย</option><option value="ja">日本語 → ไทย</option></select></label>
+    <label>บริเวณที่อ่านข้อความ<select id="region"><option value="bottom">ด้านล่าง 35% (ซับไตเติล)</option><option value="full">ทั้งภาพ</option></select></label>
+    <label>พักระหว่างรอบ<select id="interval"><option value="1000">1 วินาที</option><option value="2000">2 วินาที</option><option value="500">0.5 วินาที</option></select></label>
+    <button id="start">เลือกเกม / สตรีม</button><button id="stop" disabled>หยุด</button><button id="popup">เปิดป๊อปอัปคำแปล</button>
+  </section>
+  <p id="status" role="status">พร้อมเริ่ม — ภาพประมวลผลบนเครื่อง ส่งเฉพาะข้อความไปยัง API</p>
+  <div class="layout">
+    <section><div class="preview"><video id="video" autoplay muted playsinline></video><div id="caption" aria-live="polite">คำแปลจะแสดงที่นี่</div></div>
+    <p class="hint">เลือกเฉพาะหน้าต่างเกม/แท็บสตรีม เพื่อไม่ให้ระบบอ่านข้อความคำแปลของตัวเอง ใช้ Chrome หรือ Edge บน localhost / HTTPS</p></section>
+    <section class="study">
+      <h2>ฝึกภาษาอังกฤษ</h2>
+      <label class="check"><input type="checkbox" id="practice">ซ่อนคำแปล ให้ลองแปลก่อน</label>
+      <p class="hint">เปิดโหมดฝึกเพื่อหยุดที่ประโยคปัจจุบัน กด “ประโยคถัดไป” เพื่อรับประโยคใหม่จากเกม</p>
+      <h3 id="original">รอข้อความจากเกม</h3>
+      <label>ลองเขียนคำแปลของคุณ<textarea id="attempt" rows="3" placeholder="ฉันคิดว่าประโยคนี้หมายถึง…"></textarea></label>
+      <div class="actions"><button id="reveal">เฉลยคำแปล</button><button id="listen">ฟังภาษาอังกฤษ</button><button id="next">ประโยคถัดไป</button></div>
+      <p id="answer" aria-live="polite"></p>
+      <button id="save">เก็บประโยคไว้ทบทวน</button>
+      <h3>ประโยคที่เก็บไว้ (เฉพาะรอบนี้)</h3><ul id="saved"></ul>
+    </section>
+  </div>
+</main>
+</body>
+</html>
