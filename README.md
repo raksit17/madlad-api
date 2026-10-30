@@ -6,6 +6,53 @@ The default remains MADLAD. Both backends preserve the existing NestJS
 
 ## Layout
 
+## แปลเกม / สตรีม และฝึกภาษาอังกฤษ
+
+หลังเปิดเซิร์ฟเวอร์ ไปที่ **http://localhost:8000/stream**
+
+1. เลือก English หรือ Japanese → ไทย และบริเวณซับไตเติล (ล่าง 35%) หรือทั้งภาพ
+2. กด **เลือกเกม / สตรีม** แล้วอนุญาตแชร์หน้าต่างเกมหรือแท็บวิดีโอ
+3. คำแปลจะแสดงบนภาพตัวอย่าง กด **เปิดป๊อปอัปคำแปล** เพื่อแยกหน้าต่าง
+4. เปิด **ซ่อนคำแปล ให้ลองแปลก่อน** เพื่อฝึกอังกฤษ: อ่านประโยค เขียนคำแปล
+   ฟังเสียง แล้วกดเฉลย เปรียบเทียบด้วยตัวเอง (ไม่มีการให้คะแนนอัตโนมัติ)
+5. โหมดฝึกจะหยุดรับประโยคใหม่จนกด **ประโยคถัดไป**;
+   เก็บประโยคไว้ทบทวนแบบพับเฉลยได้ สูงสุด 100 ประโยค รีเฟรชแล้วรายการจะหาย
+6. กด **หยุด** หรือหยุดแชร์จากเบราว์เซอร์ เพื่อปิด capture และ OCR
+
+### ข้อกำหนดและข้อจำกัด
+
+- ใช้ desktop Chrome/Edge บน localhost หรือ HTTPS; ต้องอนุญาตแชร์ภาพทุกครั้ง
+  ([Screen Capture API](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia)).
+- OCR ใช้ [Tesseract.js](https://github.com/naptha/tesseract.js) 5.1.1 ในเบราว์เซอร์
+  โหลด library/worker/โมเดลภาษาผ่าน CDN จึงต้องมีอินเทอร์เน็ตครั้งแรก
+  ภาพไม่ถูกส่งไป API; ส่งเฉพาะข้อความไปยัง translation provider ที่ตั้งไว้
+- ใช้ API เดิม `/v1/translate` และรองรับทั้ง MADLAD / Qwen โดยไม่เปลี่ยนสัญญา API
+- ทำงานแบบอ่านภาพต่อเนื่อง (near real time): จบรอบ OCR+แปลแล้วพักตามค่าที่เลือก
+  ไม่ใช่รับประกันคำแปลทุก 0.5 วินาที ความหน่วงขึ้นกับเครื่อง โมเดล และข้อความ
+  ไม่ส่งหลายเฟรมซ้อนกัน มี cache 100 ข้อความต่อ session และ timeout API 180 วินาที
+- ป๊อปอัปเป็นหน้าต่างเบราว์เซอร์ ไม่ใช่ native always-on-top overlay:
+  เกม exclusive fullscreen อาจบังหน้าต่าง ใช้โหมด windowed/borderless
+  และจัดวางหน้าต่างข้างกันหรือจอที่สอง (ยังไม่ได้ทดสอบกับเกมจริงทุกชนิด)
+- เลือกแชร์เฉพาะเกม/แท็บสตรีม ไม่รวมหน้าต่างคำแปล เพื่อหลีกเลี่ยง OCR อ่านตัวเอง
+  ภาพป้องกันการจับภาพ/DRM อาจเป็นสีดำ ตัวอักษรเล็กหรือพื้นหลังซับซ้อนอาจอ่านผิด
+- เสียงอ่านใช้เสียงอังกฤษที่มีในระบบ/เบราว์เซอร์ โหมดฝึกอังกฤษใช้ source=en
+- ไม่มีการบันทึกภาพหรือประโยคถาวร; คำแปลจากโมเดลใช้เป็นแนวทางฝึก ไม่ใช่เฉลยที่รับประกัน
+
+### Tests
+
+```sh
+python -m pip install fastapi httpx pydantic-settings
+python -m unittest discover -s tests -v
+node --test tests/stream.test.mjs
+```
+
+Tests mock the OCR/translation engines and screen capture; they verify cache, retries,
+study mode, popup rendering, cleanup and static routes without downloading model weights.
+For a manual smoke test, share an English subtitle video, verify Thai captions and popup,
+enable practice and reveal an answer, then stop sharing and confirm capture ends.
+
+## Backend layout
+
 - `app/services/madlad.py`: original MADLAD backend
 - `app/experimental/qwen/`: Qwen via Ollama and its Thai subtitle prompt
 - `experiments/translation_comparison/`: repeatable translation comparisons
@@ -85,3 +132,4 @@ Notes:
 - Qwen's `device=ollama` identifies the backend, not a GPU claim.
 - Output quality is not guaranteed; compare real EN/JA subtitle lines.
 - The NestJS subtitle alignment and timestamps are unchanged.
+

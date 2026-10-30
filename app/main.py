@@ -1,6 +1,9 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import router
 from app.core.config import get_settings
@@ -40,6 +43,13 @@ app = FastAPI(
 )
 
 app.include_router(router)
+static_dir = Path(__file__).parent / "static"
+app.mount("/stream-assets", StaticFiles(directory=static_dir), name="stream-assets")
+
+
+@app.get("/stream", include_in_schema=False)
+async def stream_page():
+    return FileResponse(static_dir / "index.html")
 
 
 @app.get("/")
@@ -54,6 +64,8 @@ async def root():
             else settings.model_name
         ),
         "docs": "/docs",
+        "stream": "/stream",
         "translate": "/v1/translate",
         "batch": "/v1/translate/batch",
     }
+
